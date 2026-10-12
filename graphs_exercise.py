@@ -46,8 +46,60 @@ def in_out_degree(graph):
     return in_degree, out_degree
 
 
+def dfs(graph, start):
+    """
+    Finds all vertices reachable from the start
+    :param graph: adjacency list od a graph (undirected or directed)
+    :param start: the starting vertex
+    :return: list[str], the vertices reachable from start, in the order you first visit them.
+    """
+    actual_node = start
+    visited = [start] # a set of all visited vertices
+    walk = [start] # saving every step I take, so that I can determine, where to get back, when stuck
+    while True:
+        unvisited_neighbours = [neighbour for neighbour in graph[actual_node] if neighbour not in visited]
+        if not unvisited_neighbours: # the case, when I'm stuck
+            if actual_node == start: # end the search
+                break
+            else: # return to the node I initially came here from (using walk)
+                idx = walk.index(actual_node) # return the index of the first occurrence of actual_node in the walk
+                actual_node = walk[idx-1]
+                walk.append(actual_node)
+        else:
+            unvisited_neighbours.sort()
+            actual_node = unvisited_neighbours[0] # move to the alphabetically first unvisited neighbour
+            walk.append(actual_node)
+            visited.append(actual_node)
+    return visited
+
+
+def connected_components(graph):
+    connected_comp =[]
+    remaining_vertices = set(graph.keys()) # the vertices, that are not yet in any connected component
+    while remaining_vertices:
+        start = remaining_vertices.pop()
+        component = set(dfs(graph, start))
+        connected_comp.append(component) # add the connected component to the list of all connected components
+        remaining_vertices = remaining_vertices - component
+    return connected_comp
+
+
+def is_weakly_connected(graph):
+    shadow_graph = graph.copy()
+    for vertex in graph:
+        for destination in graph[vertex]:
+            shadow_graph[destination].append(vertex)
+    components = connected_components(shadow_graph)
+    if len(components) == 1:
+        return True
+    else:
+        return False
+
+
+
 if __name__ == "__main__":
     # TASK 1
+    print("--- Task 1 ---")
     E = [('P1', 'P2'), ('P1', 'P3'), ('P2', 'P3'), ('P3', 'P4'), ('P4', 'P5')]
     undirected_graph = build_adjacency_list(E)
     print(undirected_graph)
@@ -55,4 +107,19 @@ if __name__ == "__main__":
     directed_graph = build_adjacency_list(E, directed=True)
     print(directed_graph)
     print(in_out_degree(directed_graph))
+
+    # TASK 3
+    print("--- Task 3 ---")
+    E1 = [('A', 'D'), ('A', 'I'), ('B', 'D'), ('B', 'F'), ('B', 'G'), ('B', 'I'), ('C', 'E'), ('C', 'H'), ('C', 'J'), ('C', 'K'), ('D', 'F'), ('D', 'G'), ('E', 'J'), ('H', 'J'), ('J', 'K')]
+    G1 = build_adjacency_list(E1)
+    print('G1 from A: ', dfs(G1, 'A'))
+    print('G1 from C: ', dfs(G1, 'C'))
+    E2 = [('P', 'Q'), ('Q', 'R'), ('R', 'P'), ('R', 'S'), ('T', 'S')]
+    G2 = build_adjacency_list(E2, directed=True)
+    print('G2 from P: ', dfs(G2, 'P'))
+    print('G2 from S: ', dfs(G2, 'S'))
+    print('G2 from T: ', dfs(G2, 'T'))
+    print('Connected components of G1: ', connected_components(G1))
+    print('Is the G2 weakly connected? ', is_weakly_connected(G2))
+
 
