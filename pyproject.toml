@@ -1,0 +1,6 @@
+[project]
+name = "exercise-graphs"
+version = "0.1.0"
+description = "Graph theory: representation, degree, connectivity, Eulerian paths"
+requires-python = ">=3.11"
+dependencies = []
