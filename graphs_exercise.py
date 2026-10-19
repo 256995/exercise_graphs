@@ -1,23 +1,4 @@
-def build_adjacency_list(edges, directed=False):
-    """
-    Creates the adjacency list of directed or undirected graph
-    :param edges: list of 2-tuples representing edges
-    :param directed: boolean, True for directed graphs, False for undirected
-    :return: adj_list, dict[str, list[str]]
-    """
-    vertex = []
-    for edge in edges:
-        vertex.append(edge[0])
-        vertex.append(edge[1])
-    vertex_unique = list(dict.fromkeys(vertex))
-    adj_list = {i: [] for i in vertex_unique}
-    for edge in edges:
-        u = edge[0]
-        v = edge[1]
-        adj_list[u].append(v)
-        if not directed:
-            adj_list[v].append(u)
-    return adj_list
+import copy
 
 def degrees(graph):
     """
@@ -85,7 +66,7 @@ def connected_components(graph):
 
 
 def is_weakly_connected(graph):
-    shadow_graph = graph.copy()
+    shadow_graph = copy.deepcopy(graph)
     for vertex in graph:
         for destination in graph[vertex]:
             shadow_graph[destination].append(vertex)
@@ -96,8 +77,48 @@ def is_weakly_connected(graph):
         return False
 
 
+def eulerian_type(graph, directed=False):
+    result = 'none'
+    if directed: # directed
+        if is_weakly_connected(graph):
+            in_deg, out_deg = in_out_degree(graph)
+            deg_plus = 0
+            deg_minus = 0
+            for node in in_deg:
+                if in_deg[node] == out_deg[node]:
+                    continue
+                elif in_deg[node] == out_deg[node] + 1:
+                    deg_plus += 1
+                    continue
+                elif in_deg[node] == out_deg[node] - 1:
+                    deg_minus += 1
+                    continue
+                else:
+                    return result
+            if (deg_minus == 0) and (deg_plus == 0):
+                result = 'circuit'
+            elif (deg_plus == 1) and (deg_minus == 1):
+                result = 'path'
+            print(in_deg, out_deg)
+    else: # undirected
+        if len(connected_components(graph)) == 1:
+            degrees_dict = degrees(graph)
+            odd_deg = 0
+            for node in degrees_dict:
+                if (degrees_dict[node] % 2) == 1:
+                    odd_deg += 1
+            if odd_deg == 0:
+                result = 'circuit'
+            elif odd_deg == 2:
+                result = 'path'
+            print(degrees_dict, odd_deg)
+    return result
+
 
 if __name__ == "__main__":
+
+
+
     # TASK 1
     print("--- Task 1 ---")
     E = [('P1', 'P2'), ('P1', 'P3'), ('P2', 'P3'), ('P3', 'P4'), ('P4', 'P5')]
@@ -121,5 +142,13 @@ if __name__ == "__main__":
     print('G2 from T: ', dfs(G2, 'T'))
     print('Connected components of G1: ', connected_components(G1))
     print('Is the G2 weakly connected? ', is_weakly_connected(G2))
+
+    ## TASK 4
+    print(G2)
+    G22 = build_adjacency_list(E2, directed=False)
+    print('G2 Eulerian type:', eulerian_type(G2, directed=True))
+    print('G2 Eulerian type:', eulerian_type(G22, directed=False))
+    print('G1 Eulerian type:', eulerian_type(G1, directed=True))
+
 
 
