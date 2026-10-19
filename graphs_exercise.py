@@ -1,5 +1,27 @@
 import copy
 
+def build_adjacency_list(edges, directed=False):
+    """
+    Creates the adjacency list of directed or undirected graph
+    :param edges: list of 2-tuples representing edges
+    :param directed: boolean, True for directed graphs, False for undirected
+    :return: adj_list, dict[str, list[str]]
+    """
+    vertex = []
+    for edge in edges:
+        vertex.append(edge[0])
+        vertex.append(edge[1])
+    vertex_unique = list(dict.fromkeys(vertex))
+    adj_list = {i: [] for i in vertex_unique}
+    for edge in edges:
+        u = edge[0]
+        v = edge[1]
+        adj_list[u].append(v)
+        if not directed:
+            adj_list[v].append(u)
+    return adj_list
+
+
 def degrees(graph):
     """
     Computes the degree of every vertex of an undirected graph
